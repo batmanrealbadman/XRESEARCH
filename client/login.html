@@ -305,13 +305,13 @@
             <div class="divider">OR</div>
 
             <div class="social-login">
-                <button type="button" class="social-btn">
+                <button type="button" class="social-btn" id="googleLogin">
                     <i class="fab fa-google"></i>
                 </button>
-                <button type="button" class="social-btn">
+                <button type="button" class="social-btn" id="facebookLogin">
                     <i class="fab fa-facebook-f"></i>
                 </button>
-                <button type="button" class="social-btn">
+                <button type="button" class="social-btn" id="linkedinLogin">
                     <i class="fab fa-linkedin-in"></i>
                 </button>
             </div>
@@ -322,7 +322,19 @@
         </form>
     </div>
 
+    <!-- Auth0 SDK -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script>
+        // Initialize Auth0
+        const auth0 = new Auth0Client({
+            domain: 'dev-hwf0akvlgrxxy8fx.us.auth0.com',
+            client_id: 'mJ49dKcdMK7L6vmBimWTcKeKiHYrhdhF',
+            redirect_uri: window.location.origin,
+            cacheLocation: 'localstorage',
+            useRefreshTokens: true
+        });
+
+        // Email/Password Login
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -354,37 +366,43 @@
             loginBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
+                // Auth0 login
+                await auth0.loginWithRedirect({
+                    realm: 'Username-Password-Authentication',
+                    login_hint: email,
+                    password: password,
+                    redirect_uri: window.location.origin
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Login failed');
-                }
-
-                // Store session and redirect
-                localStorage.setItem('supabase_session', JSON.stringify(data.session));
-                window.location.href = 'dashboard.html';
 
             } catch (error) {
                 console.error('Login error:', error);
-                passwordError.textContent = error.message.includes('Failed to fetch')
-                    ? 'Server unavailable. Please try again later.'
-                    : error.message;
+                passwordError.textContent = error.message.includes('Invalid credentials') 
+                    ? 'Invalid email or password' 
+                    : 'Login failed. Please try again.';
                 passwordError.style.display = 'block';
             } finally {
                 loginBtn.classList.remove('btn-loading');
                 loginBtn.disabled = false;
             }
+        });
+
+        // Social Logins
+        document.getElementById('googleLogin').addEventListener('click', () => {
+            auth0.loginWithRedirect({
+                connection: 'google'
+            });
+        });
+
+        document.getElementById('facebookLogin').addEventListener('click', () => {
+            auth0.loginWithRedirect({
+                connection: 'facebook'
+            });
+        });
+
+        document.getElementById('linkedinLogin').addEventListener('click', () => {
+            auth0.loginWithRedirect({
+                connection: 'linkedin'
+            });
         });
 
         // Toggle password visibility
@@ -395,10 +413,26 @@
             this.classList.toggle('fa-eye-slash');
         });
 
-        // Auto-focus email field on page load
-        document.addEventListener('DOMContentLoaded', () => {
+        // Check for authentication callback
+        async function handleRedirectCallback() {
+            try {
+                const { appState } = await auth0.handleRedirectCallback();
+                window.history.replaceState({}, document.title, window.location.pathname);
+                window.location.href = appState?.targetUrl || 'dashboard.html';
+            } catch (error) {
+                console.error('Auth callback error:', error);
+            }
+        }
+
+        // Initialize auth flow
+        (async function() {
+            if (window.location.search.includes('code=')) {
+                await handleRedirectCallback();
+            }
+
+            // Auto-focus email field
             document.getElementById('email').focus();
-        });
+        })();
     </script>
 </body>
 </html>
