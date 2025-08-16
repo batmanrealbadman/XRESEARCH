@@ -41,7 +41,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             padding: 40px;
             margin: 20px;
             position: relative;
@@ -76,15 +76,8 @@
             margin-top: 10px;
         }
 
-        .logo p {
-            color: var(--gray);
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
         .form-group {
-            margin-bottom: 25px;
-            position: relative;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -92,120 +85,63 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--dark);
-            font-size: 0.95rem;
         }
 
-        .form-control {
+        .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--light-gray);
+            padding: 15px;
+            border: 1px solid var(--light-gray);
             border-radius: 10px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: var(--light);
+            transition: border 0.3s ease;
         }
 
-        .form-control:focus {
+        .form-group input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
-            background-color: white;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--gray);
         }
 
         .btn {
-            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
             padding: 15px;
             border-radius: 10px;
+            width: 100%;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: none;
-            font-size: 1rem;
-            position: relative;
-            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-        }
-
-        .btn-primary:hover {
+        .btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .form-footer {
-            margin-top: 25px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        .form-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .form-footer a:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #dc3545;
-            margin-top: 8px;
-            font-size: 0.85rem;
-            display: none;
-            padding-left: 5px;
         }
 
         .btn-spinner {
             display: none;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .btn-text {
-            transition: opacity 0.3s;
-        }
-
-        .btn-loading .btn-text {
-            opacity: 0;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
         }
 
         .btn-loading .btn-spinner {
             display: inline-block;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .divider {
             display: flex;
             align-items: center;
-            margin: 25px 0;
+            margin: 20px 0;
             color: var(--gray);
-            font-size: 0.9rem;
         }
 
         .divider::before, .divider::after {
@@ -222,45 +158,39 @@
             margin-left: 15px;
         }
 
-        .social-login {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .social-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 1px solid var(--light-gray);
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
             color: var(--gray);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .social-btn:hover {
-            background: var(--light);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #e63946;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 20px;
         }
 
         @media (max-width: 576px) {
             .login-container {
                 padding: 30px;
-            }
-            
-            .logo i {
-                font-size: 3rem;
-            }
-            
-            .logo h1 {
-                font-size: 1.8rem;
             }
         }
     </style>
@@ -270,168 +200,134 @@
         <div class="logo">
             <i class="fas fa-graduation-cap"></i>
             <h1>ResearchX</h1>
-            <p>Login to access your research dashboard</p>
         </div>
 
-        <form id="loginForm">
+        <form id="login-form">
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
-                <div class="error-message" id="emailError"></div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <div id="email-error" class="error-message"></div>
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <div class="password-container">
-                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
-                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
-                </div>
-                <div class="error-message" id="passwordError"></div>
+                <input type="password" id="password" name="password" required>
+                <div id="password-error" class="error-message"></div>
             </div>
 
-            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="form-check">
-                    <input type="checkbox" id="rememberMe" class="form-check-input">
-                    <label for="rememberMe" style="font-size: 0.9rem;">Remember me</label>
-                </div>
-                <a href="forgot-password.html" style="font-size: 0.9rem;">Forgot Password?</a>
+            <div class="forgot-password">
+                <a href="forgot-password.html">Forgot password?</a>
             </div>
 
-            <button type="submit" class="btn btn-primary" id="loginBtn">
+            <button type="submit" id="login-btn" class="btn">
                 <span class="btn-text">Login</span>
-                <span class="btn-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+                <i class="fas fa-spinner btn-spinner"></i>
             </button>
-
-            <div class="divider">OR</div>
-
-            <div class="social-login">
-                <button type="button" class="social-btn" id="googleLogin">
-                    <i class="fab fa-google"></i>
-                </button>
-                <button type="button" class="social-btn" id="facebookLogin">
-                    <i class="fab fa-facebook-f"></i>
-                </button>
-                <button type="button" class="social-btn" id="linkedinLogin">
-                    <i class="fab fa-linkedin-in"></i>
-                </button>
-            </div>
-
-            <div class="form-footer">
-                <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
-            </div>
         </form>
+
+        <div class="divider">OR</div>
+
+        <button id="google-login" class="btn" style="background: #4285F4;">
+            <i class="fab fa-google"></i>
+            <span class="btn-text">Login with Google</span>
+        </button>
+
+        <div class="form-footer">
+            <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+        </div>
     </div>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize Auth0
-        const auth0 = new Auth0Client({
-            domain: 'dev-hwf0akvlgrxxy8fx.us.auth0.com',
-            client_id: 'mJ49dKcdMK7L6vmBimWTcKeKiHYrhdhF',
-            redirect_uri: window.location.origin,
-            cacheLocation: 'localstorage',
-            useRefreshTokens: true
-        });
+        // Initialize Supabase with your credentials
+        const supabaseUrl = 'https://wrmzehgbqjpiiaazmmgh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndybXplaGdicWpwaWlhYXptbWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4Mjg4MjEsImV4cCI6MjA3MDQwNDgyMX0.9p5NdmJoUvRjPmApqZo1C7QZdfO1X9QCD72gD6fpr98';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Email/Password Login
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        // Email Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const loginBtn = document.getElementById('loginBtn');
-            const emailError = document.getElementById('emailError');
-            const passwordError = document.getElementById('passwordError');
-
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const button = document.getElementById('login-btn');
+            
             // Reset errors
-            emailError.style.display = 'none';
-            passwordError.style.display = 'none';
-
-            // Validate inputs
-            if (!email) {
-                emailError.textContent = 'Email is required';
-                emailError.style.display = 'block';
-                return;
-            }
-
-            if (!password) {
-                passwordError.textContent = 'Password is required';
-                passwordError.style.display = 'block';
-                return;
-            }
-
+            document.getElementById('email-error').style.display = 'none';
+            document.getElementById('password-error').style.display = 'none';
+            
             // Show loading state
-            loginBtn.classList.add('btn-loading');
-            loginBtn.disabled = true;
-
+            button.classList.add('btn-loading');
+            button.disabled = true;
+            
             try {
-                // Auth0 login
-                await auth0.loginWithRedirect({
-                    realm: 'Username-Password-Authentication',
-                    login_hint: email,
-                    password: password,
-                    redirect_uri: window.location.origin
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
-
+                
+                if (error) {
+                    if (error.message.includes('Email')) {
+                        document.getElementById('email-error').textContent = error.message;
+                        document.getElementById('email-error').style.display = 'block';
+                    } else if (error.message.includes('Password')) {
+                        document.getElementById('password-error').textContent = error.message;
+                        document.getElementById('password-error').style.display = 'block';
+                    } else {
+                        alert(error.message);
+                    }
+                } else {
+                    // Successful login - redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                }
             } catch (error) {
                 console.error('Login error:', error);
-                passwordError.textContent = error.message.includes('Invalid credentials') 
-                    ? 'Invalid email or password' 
-                    : 'Login failed. Please try again.';
-                passwordError.style.display = 'block';
+                alert('An error occurred during login. Please try again.');
             } finally {
-                loginBtn.classList.remove('btn-loading');
-                loginBtn.disabled = false;
+                button.classList.remove('btn-loading');
+                button.disabled = false;
             }
         });
 
-        // Social Logins
-        document.getElementById('googleLogin').addEventListener('click', () => {
-            auth0.loginWithRedirect({
-                connection: 'google'
-            });
-        });
-
-        document.getElementById('facebookLogin').addEventListener('click', () => {
-            auth0.loginWithRedirect({
-                connection: 'facebook'
-            });
-        });
-
-        document.getElementById('linkedinLogin').addEventListener('click', () => {
-            auth0.loginWithRedirect({
-                connection: 'linkedin'
-            });
-        });
-
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        // Check for authentication callback
-        async function handleRedirectCallback() {
+        // Google Login
+        document.getElementById('google-login').addEventListener('click', async () => {
+            const button = document.getElementById('google-login');
+            
             try {
-                const { appState } = await auth0.handleRedirectCallback();
-                window.history.replaceState({}, document.title, window.location.pathname);
-                window.location.href = appState?.targetUrl || 'dashboard.html';
+                button.classList.add('btn-loading');
+                button.disabled = true;
+                
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://researchxng.vercel.app/dashboard.html'
+                    }
+                });
+                
+                if (error) throw error;
             } catch (error) {
-                console.error('Auth callback error:', error);
+                console.error('Google login error:', error);
+                alert('Google login failed. Please try again.');
+            } finally {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
             }
-        }
+        });
 
-        // Initialize auth flow
+        // Check for existing session (if user returns)
         (async function() {
-            if (window.location.search.includes('code=')) {
-                await handleRedirectCallback();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
             }
-
-            // Auto-focus email field
-            document.getElementById('email').focus();
+            
+            // Listen for auth events (like returning from OAuth)
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN') {
+                    window.location.href = 'dashboard.html';
+                }
+            });
         })();
     </script>
 </body>

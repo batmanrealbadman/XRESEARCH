@@ -85,65 +85,56 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--dark);
-            font-size: 0.95rem;
         }
 
-        .form-control {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--light-gray);
+            padding: 15px;
+            border: 1px solid var(--light-gray);
             border-radius: 10px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: var(--light);
+            transition: border 0.3s ease;
         }
 
-        .form-control:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
-            background-color: white;
         }
 
         .btn {
-            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
             padding: 15px;
             border-radius: 10px;
+            width: 100%;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: none;
-            font-size: 1rem;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
-        }
-
-        .btn-primary:hover {
+        .btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
         }
 
-        .form-footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--gray);
+        .btn-spinner {
+            display: none;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
         }
 
-        .form-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
+        .btn-loading .btn-spinner {
+            display: inline-block;
         }
 
-        .form-footer a:hover {
-            text-decoration: underline;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .divider {
@@ -167,30 +158,28 @@
             margin-left: 15px;
         }
 
-        .auth0-btn {
-            background: #eb5424;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            width: 100%;
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
             font-weight: 600;
         }
 
-        .auth0-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+        .form-footer a:hover {
+            text-decoration: underline;
         }
 
-        .auth0-btn i {
-            margin-right: 10px;
-            font-size: 1.2rem;
+        .error-message {
+            color: #e63946;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
         }
 
         @media (max-width: 576px) {
@@ -207,53 +196,245 @@
             <h1>ResearchX</h1>
         </div>
 
-        <button id="auth0-signup" class="auth0-btn">
-            <i class="fas fa-user-plus"></i> Sign Up with Auth0
-        </button>
+        <form id="signup-form">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" required>
+                <div id="fullname-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+                <div id="username-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <div id="email-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" minlength="6" required>
+                <div id="password-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="user_type">I am a:</label>
+                <select id="user_type" name="user_type" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="lecturer">Lecturer</option>
+                    <option value="researcher">Independent Researcher</option>
+                </select>
+                <div id="usertype-error" class="error-message"></div>
+            </div>
+
+            <button type="submit" id="signup-btn" class="btn">
+                <span class="btn-text">Sign Up</span>
+                <i class="fas fa-spinner btn-spinner"></i>
+            </button>
+        </form>
 
         <div class="divider">OR</div>
+
+        <button id="google-signup" class="btn" style="background: #4285F4;">
+            <i class="fab fa-google"></i>
+            <span class="btn-text">Sign Up with Google</span>
+        </button>
 
         <div class="form-footer">
             <p>Already have an account? <a href="login.html">Login</a></p>
         </div>
     </div>
 
-    <!-- Auth0 SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize Auth0
-        const auth0 = new Auth0Client({
-            domain: 'dev-hwf0akvlgrxxy8fx.us.auth0.com',
-            client_id: 'mJ49dKcdMK7L6vmBimWTcKeKiHYrhdhF',
-            redirect_uri: window.location.origin,
-            cacheLocation: 'localstorage',
-            useRefreshTokens: true
-        });
+        // Initialize Supabase with your credentials
+        const supabaseUrl = 'https://wrmzehgbqjpiiaazmmgh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndybXplaGdicWpwaWlhYXptbWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4Mjg4MjEsImV4cCI6MjA3MDQwNDgyMX0.9p5NdmJoUvRjPmApqZo1C7QZdfO1X9QCD72gD6fpr98';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Signup Button
-        document.getElementById('auth0-signup').addEventListener('click', () => {
-            auth0.loginWithRedirect({
-                screen_hint: 'signup'
+        // Email Signup
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const fullname = document.getElementById('fullname').value;
+            const userType = document.getElementById('user_type').value;
+            
+            const button = document.getElementById('signup-btn');
+            
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
             });
+            
+            // Show loading state
+            button.classList.add('btn-loading');
+            button.disabled = true;
+            
+            try {
+                // First sign up the user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            username,
+                            full_name: fullname,
+                            user_type: userType
+                        },
+                        emailRedirectTo: 'https://researchxng.vercel.app/dashboard.html'
+                    }
+                });
+                
+                if (authError) {
+                    handleAuthError(authError);
+                    return;
+                }
+
+                // Then save additional user data to a profiles table
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                        { 
+                            id: authData.user.id,
+                            username,
+                            full_name: fullname,
+                            user_type: userType,
+                            email
+                        }
+                    ]);
+                
+                if (profileError) {
+                    throw profileError;
+                }
+
+                // Check if email confirmation is required
+                if (authData.user?.identities?.length === 0) {
+                    // Email confirmation sent
+                    alert('Please check your email for a confirmation link. Once confirmed, you can log in.');
+                } else {
+                    // Immediate redirect for users who don't need confirmation
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('An error occurred during signup. Please try again.');
+            } finally {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
         });
 
-        // Check for authentication callback
-        async function handleRedirectCallback() {
-            try {
-                const { appState } = await auth0.handleRedirectCallback();
-                window.history.replaceState({}, document.title, window.location.pathname);
-                window.location.href = appState?.targetUrl || 'dashboard.html';
-            } catch (error) {
-                console.error('Auth callback error:', error);
+        // Handle authentication errors
+        function handleAuthError(error) {
+            if (error.message.includes('Email')) {
+                document.getElementById('email-error').textContent = error.message;
+                document.getElementById('email-error').style.display = 'block';
+            } else if (error.message.includes('Password')) {
+                document.getElementById('password-error').textContent = error.message;
+                document.getElementById('password-error').style.display = 'block';
+            } else if (error.message.includes('username')) {
+                document.getElementById('username-error').textContent = error.message;
+                document.getElementById('username-error').style.display = 'block';
+            } else {
+                alert(error.message);
             }
         }
 
-        // Initialize auth flow
-        (async function() {
-            if (window.location.search.includes('code=')) {
-                await handleRedirectCallback();
+        // Google Signup
+        document.getElementById('google-signup').addEventListener('click', async () => {
+            const button = document.getElementById('google-signup');
+            
+            try {
+                button.classList.add('btn-loading');
+                button.disabled = true;
+                
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://researchxng.vercel.app/dashboard.html',
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
+                    }
+                });
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Google signup error:', error);
+                alert('Google signup failed. Please try again.');
+            } finally {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
             }
+        });
+
+        // Check for existing session (if user returns)
+        (async function() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+            
+            // Listen for auth events (like returning from OAuth)
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN') {
+                    // For OAuth signups, we need to create the profile
+                    if (session?.user?.identities?.[0]?.provider === 'google') {
+                        createProfileFromOAuth(session.user);
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                }
+            });
         })();
+
+        // Create profile for OAuth users
+        async function createProfileFromOAuth(user) {
+            try {
+                // Check if profile already exists
+                const { data: existingProfile, error: fetchError } = await supabase
+                    .from('profiles')
+                    .select()
+                    .eq('id', user.id)
+                    .single();
+                
+                if (fetchError && !fetchError.message.includes('No rows found')) {
+                    throw fetchError;
+                }
+                
+                if (!existingProfile) {
+                    // Create profile for OAuth user
+                    const { error } = await supabase
+                        .from('profiles')
+                        .insert([
+                            { 
+                                id: user.id,
+                                username: user.email.split('@')[0],
+                                full_name: user.user_metadata?.full_name || '',
+                                user_type: 'student', // Default for OAuth users
+                                email: user.email
+                            }
+                        ]);
+                    
+                    if (error) throw error;
+                }
+                
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('Profile creation error:', error);
+                alert('Error setting up your profile. Please contact support.');
+            }
+        }
     </script>
 </body>
 </html>
