@@ -17,7 +17,6 @@
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
-            --secondary: #3f37c9;
             --accent: #f72585;
             --dark: #212529;
             --light: #f8f9fa;
@@ -258,22 +257,72 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndybXplaGdicWpwaWlhYXptbWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4Mjg4MjEsImV4cCI6MjA3MDQwNDgyMX0.9p5NdmJoUvRjPmApqZo1C7QZdfO1X9QCD72gD6fpr98';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Email Signup
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value;
-            const fullname = document.getElementById('fullname').value;
-            const userType = document.getElementById('user_type').value;
-            
-            const button = document.getElementById('signup-btn');
+        // Utility function to show errors
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            field.textContent = message;
+            field.style.display = 'block';
+        }
+
+        // Validate form inputs
+        function validateForm() {
+            let isValid = true;
             
             // Reset errors
             document.querySelectorAll('.error-message').forEach(el => {
                 el.style.display = 'none';
             });
+
+            // Validate each field
+            if (!document.getElementById('fullname').value.trim()) {
+                showError('fullname-error', 'Full name is required');
+                isValid = false;
+            }
+
+            if (!document.getElementById('username').value.trim()) {
+                showError('username-error', 'Username is required');
+                isValid = false;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                showError('email-error', 'Email is required');
+                isValid = false;
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                showError('email-error', 'Please enter a valid email');
+                isValid = false;
+            }
+
+            const password = document.getElementById('password').value;
+            if (!password) {
+                showError('password-error', 'Password is required');
+                isValid = false;
+            } else if (password.length < 6) {
+                showError('password-error', 'Password must be at least 6 characters');
+                isValid = false;
+            }
+
+            if (!document.getElementById('user_type').value) {
+                showError('usertype-error', 'Please select your role');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Email Signup
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) return;
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value.trim();
+            const fullname = document.getElementById('fullname').value.trim();
+            const userType = document.getElementById('user_type').value;
+            
+            const button = document.getElementById('signup-btn');
             
             // Show loading state
             button.classList.add('btn-loading');
@@ -290,7 +339,7 @@
                             full_name: fullname,
                             user_type: userType
                         },
-                        emailRedirectTo: 'https://researchxng.vercel.app/dashboard.html'
+                        emailRedirectTo: window.location.origin + '/dashboard.html'
                     }
                 });
                 
@@ -300,7 +349,7 @@
                 }
 
                 // Then save additional user data to a profiles table
-                const { data: profileData, error: profileError } = await supabase
+                const { error: profileError } = await supabase
                     .from('profiles')
                     .insert([
                         { 
@@ -308,25 +357,26 @@
                             username,
                             full_name: fullname,
                             user_type: userType,
-                            email
+                            email,
+                            created_at: new Date().toISOString()
                         }
                     ]);
                 
-                if (profileError) {
-                    throw profileError;
-                }
+                if (profileError) throw profileError;
 
                 // Check if email confirmation is required
                 if (authData.user?.identities?.length === 0) {
-                    // Email confirmation sent
                     alert('Please check your email for a confirmation link. Once confirmed, you can log in.');
                 } else {
-                    // Immediate redirect for users who don't need confirmation
                     window.location.href = 'dashboard.html';
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                alert('An error occurred during signup. Please try again.');
+                if (error.message.includes('profiles_username_key')) {
+                    showError('username-error', 'Username already exists');
+                } else {
+                    alert('An error occurred during signup. Please try again.');
+                }
             } finally {
                 button.classList.remove('btn-loading');
                 button.disabled = false;
@@ -335,15 +385,13 @@
 
         // Handle authentication errors
         function handleAuthError(error) {
+            console.error('Auth error:', error);
+            
             if (error.message.includes('Email')) {
-                document.getElementById('email-error').textContent = error.message;
-                document.getElementById('email-error').style.display = 'block';
+                showError('email-error', error.message.includes('already') ? 
+                    'Email already in use' : 'Invalid email address');
             } else if (error.message.includes('Password')) {
-                document.getElementById('password-error').textContent = error.message;
-                document.getElementById('password-error').style.display = 'block';
-            } else if (error.message.includes('username')) {
-                document.getElementById('username-error').textContent = error.message;
-                document.getElementById('username-error').style.display = 'block';
+                showError('password-error', 'Password must be stronger');
             } else {
                 alert(error.message);
             }
@@ -360,7 +408,7 @@
                 const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://researchxng.vercel.app/dashboard.html',
+                        redirectTo: window.location.origin + '/dashboard.html',
                         queryParams: {
                             access_type: 'offline',
                             prompt: 'consent'
@@ -379,24 +427,30 @@
         });
 
         // Check for existing session (if user returns)
-        (async function() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                window.location.href = 'dashboard.html';
-            }
-            
-            // Listen for auth events (like returning from OAuth)
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN') {
-                    // For OAuth signups, we need to create the profile
-                    if (session?.user?.identities?.[0]?.provider === 'google') {
-                        createProfileFromOAuth(session.user);
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
+        async function checkSession() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+                if (session) {
+                    window.location.href = 'dashboard.html';
                 }
-            });
-        })();
+                
+                // Listen for auth state changes
+                supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN') {
+                        // For OAuth signups, create profile if needed
+                        if (session?.user?.identities?.[0]?.provider === 'google') {
+                            createProfileFromOAuth(session.user);
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
 
         // Create profile for OAuth users
         async function createProfileFromOAuth(user) {
@@ -420,9 +474,10 @@
                             { 
                                 id: user.id,
                                 username: user.email.split('@')[0],
-                                full_name: user.user_metadata?.full_name || '',
+                                full_name: user.user_metadata?.full_name || user.email.split('@')[0],
                                 user_type: 'student', // Default for OAuth users
-                                email: user.email
+                                email: user.email,
+                                created_at: new Date().toISOString()
                             }
                         ]);
                     
@@ -435,6 +490,9 @@
                 alert('Error setting up your profile. Please contact support.');
             }
         }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkSession);
     </script>
 </body>
 </html>

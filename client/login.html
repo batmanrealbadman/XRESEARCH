@@ -17,7 +17,6 @@
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
-            --secondary: #3f37c9;
             --accent: #f72585;
             --dark: #212529;
             --light: #f8f9fa;
@@ -240,50 +239,67 @@
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize Supabase with your credentials
+        // Initialize Supabase FIRST
         const supabaseUrl = 'https://wrmzehgbqjpiiaazmmgh.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndybXplaGdicWpwaWlhYXptbWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4Mjg4MjEsImV4cCI6MjA3MDQwNDgyMX0.9p5NdmJoUvRjPmApqZo1C7QZdfO1X9QCD72gD6fpr98';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Utility function to show errors
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            field.textContent = message;
+            field.style.display = 'block';
+        }
 
         // Email Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             const button = document.getElementById('login-btn');
             
             // Reset errors
-            document.getElementById('email-error').style.display = 'none';
-            document.getElementById('password-error').style.display = 'none';
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Validate inputs
+            if (!email) {
+                showError('email-error', 'Email is required');
+                return;
+            }
+            if (!password) {
+                showError('password-error', 'Password is required');
+                return;
+            }
             
             // Show loading state
             button.classList.add('btn-loading');
             button.disabled = true;
             
             try {
-                const { error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabase.auth.signInWithPassword({
                     email,
                     password
                 });
                 
                 if (error) {
-                    if (error.message.includes('Email')) {
-                        document.getElementById('email-error').textContent = error.message;
-                        document.getElementById('email-error').style.display = 'block';
-                    } else if (error.message.includes('Password')) {
-                        document.getElementById('password-error').textContent = error.message;
-                        document.getElementById('password-error').style.display = 'block';
+                    console.error('Login error:', error);
+                    
+                    // Handle specific error cases
+                    if (error.message.includes('Invalid login credentials')) {
+                        showError('password-error', 'Invalid email or password');
                     } else {
-                        alert(error.message);
+                        showError('email-error', error.message);
                     }
                 } else {
-                    // Successful login - redirect to dashboard
+                    console.log('Login successful:', data);
                     window.location.href = 'dashboard.html';
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                alert('An error occurred during login. Please try again.');
+                console.error('Unexpected error:', error);
+                alert('An unexpected error occurred. Please try again.');
             } finally {
                 button.classList.remove('btn-loading');
                 button.disabled = false;
@@ -301,7 +317,11 @@
                 const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://researchxng.vercel.app/dashboard.html'
+                        redirectTo: window.location.origin + '/dashboard.html',
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
                     }
                 });
                 
@@ -315,20 +335,29 @@
             }
         });
 
-        // Check for existing session (if user returns)
-        (async function() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                window.location.href = 'dashboard.html';
-            }
-            
-            // Listen for auth events (like returning from OAuth)
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN') {
+        // Check for existing session on page load
+        async function checkSession() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+                if (session) {
                     window.location.href = 'dashboard.html';
                 }
-            });
-        })();
+                
+                // Listen for auth state changes
+                supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN') {
+                        window.location.href = 'dashboard.html';
+                    }
+                });
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkSession);
     </script>
 </body>
 </html>
